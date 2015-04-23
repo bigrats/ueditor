@@ -2,6 +2,13 @@
 
     UE.Editor.prototype.loadServerConfig = function(){
         var me = this;
+		if(UE.SERVER_CONFIG){
+			/* 检查服务器参数是否加载过，如果有则直接使用 */
+			utils.extend(me.options, UE.SERVER_CONFIG);
+			me.fireEvent('serverConfigLoaded');
+			me._serverConfigLoaded = true;
+			return;
+		}
         setTimeout(function(){
             try{
                 me.options.imageUrl && me.setOpt('serverUrl', me.options.imageUrl.replace(/^(.*[\/]).+([\.].+)$/, '$1controller$2'));
@@ -18,6 +25,7 @@
                     'onsuccess':function(r){
                         try {
                             var config = isJsonp ? r:eval("("+r.responseText+")");
+							UE.SERVER_CONFIG = config;  /* 保存加载到的服务器配置参数，下次重用 */
                             utils.extend(me.options, config);
                             me.fireEvent('serverConfigLoaded');
                             me._serverConfigLoaded = true;
